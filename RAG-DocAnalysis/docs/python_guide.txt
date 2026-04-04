@@ -1,0 +1,148 @@
+PYTHON BEST PRACTICES FOR MODERN SOFTWARE DEVELOPMENT
+======================================================
+
+This guide summarises the coding conventions and tooling choices used by
+experienced Python developers to write readable, maintainable, and robust code.
+Following these practices will make your projects easier for teammates to
+understand, test, and extend.
+
+──────────────────────────────────────────────────────────────────────────────
+
+1. VIRTUAL ENVIRONMENTS
+------------------------
+Always isolate project dependencies in a virtual environment. Python ships with
+the built-in  venv  module:
+
+    python -m venv .venv
+    source .venv/bin/activate          # macOS/Linux
+    .venv\Scripts\Activate.ps1         # Windows PowerShell
+
+For data science or multi-environment workflows, conda (or mamba) is a popular
+alternative because it can manage non-Python system libraries too.
+
+Use  pip  or  uv  (a faster Rust-based package manager) to install and pin
+dependencies. Commit a  requirements.txt  or  pyproject.toml  so any developer
+can reproduce the environment with a single command.
+
+2. TYPE HINTS
+--------------
+Python's type hint syntax (PEP 484 and later PEPs) makes intention explicit,
+enables IDE auto-completion, and lets static analysers such as mypy or pyright
+catch bugs before runtime.
+
+    def greet(name: str, times: int = 1) -> str:
+        return (f"Hello, {name}! " * times).strip()
+
+Use  from __future__ import annotations  at the top of each file (Python 3.10+
+renders this unnecessary) to enable forward references without quotes. For
+complex types use  collections.abc.Sequence ,  list[str] ,  dict[str, int] ,
+and  Optional[...]  (or the modern  X | None  syntax).
+
+3. F-STRINGS FOR STRING FORMATTING
+------------------------------------
+Since Python 3.6, f-strings are the preferred way to embed expressions inside
+string literals. They are faster than  %-formatting  and  str.format() , and
+they are easier to read:
+
+    user = "Alice"
+    score = 42
+    print(f"Player {user} scored {score} points.")   # preferred
+
+Avoid concatenating strings with  +  in loops; this creates many intermediate
+objects. Use a list comprehension with  "".join()  instead.
+
+4. CONTEXT MANAGERS FOR RESOURCE HANDLING
+-------------------------------------------
+Always use the  with  statement when working with resources that must be
+released (files, database connections, locks, HTTP sessions). This guarantees
+clean-up even if an exception is raised:
+
+    with open("data.csv", encoding="utf-8") as fh:
+        content = fh.read()
+
+For custom objects, implement  __enter__  and  __exit__ , or use
+ contextlib.contextmanager .
+
+5. LIST COMPREHENSIONS AND GENERATOR EXPRESSIONS
+--------------------------------------------------
+Prefer list comprehensions over  for  loops when building lists from iterables.
+They are more Pythonic and often faster:
+
+    squares = [x ** 2 for x in range(10) if x % 2 == 0]
+
+For large data that need not all reside in memory at once, use a generator
+expression (replace  []  with  () ) to iterate lazily.
+
+6. DATACLASSES FOR DATA STRUCTURES
+-------------------------------------
+Use  dataclasses  (Python 3.7+) instead of plain dicts or verbose classes when
+you need a simple container with named fields, type hints, and optional default
+values:
+
+    from dataclasses import dataclass, field
+
+    @dataclass
+    class Config:
+        model: str = "gemma3:1b"
+        temperature: float = 0.1
+        tags: list[str] = field(default_factory=list)
+
+For immutable, hashable records, add  frozen=True . For richer validation,
+consider  pydantic.BaseModel .
+
+7. TESTING WITH PYTEST
+-----------------------
+pytest is the de-facto standard testing framework for Python. It requires
+no boilerplate: test files begin with  test_  and test functions start with
+ test_ :
+
+    # test_greet.py
+    def test_greet_default():
+        assert greet("Bob") == "Hello, Bob!"
+
+Run the full suite with  pytest  or specific files with  pytest tests/test_greet.py .
+Use fixtures ( @pytest.fixture ) for shared set-up and  pytest.mark.parametrize
+for data-driven tests. Aim for at least 80% code coverage, measured with
+ pytest-cov .
+
+8. USE LOGGING, NOT PRINT STATEMENTS
+--------------------------------------
+In production code, the  logging  module is always preferred over  print .
+Logging provides configurable severity levels (DEBUG, INFO, WARNING, ERROR,
+CRITICAL), structured output, and seamless integration with centralised log
+aggregation tools.
+
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info("Processing file: %s", filename)
+
+Configure the root logger once in your application's entry point:
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+
+9. PATHLIB FOR FILE PATHS
+--------------------------
+Use  pathlib.Path  instead of  os.path  string manipulation. Path objects are
+cross-platform, composable, and expressive:
+
+    from pathlib import Path
+    base = Path(__file__).resolve().parent
+    config_file = base / "config" / "settings.toml"
+    config_file.parent.mkdir(parents=True, exist_ok=True)
+
+10. CODE FORMATTING WITH BLACK AND RUFF
+-----------------------------------------
+Adopt a zero-configuration code formatter such as  black  (enforces a consistent
+style) and use  ruff  as a fast lint/import-sorter replacement for flake8 + isort.
+Pre-commit hooks ensure every commit is correctly formatted before it hits the
+repository:
+
+    [tool.ruff]
+    line-length = 88
+    select = ["E", "F", "I"]
+
+These tools eliminate style debates in code review and keep the diff focused
+on meaningful logic changes.

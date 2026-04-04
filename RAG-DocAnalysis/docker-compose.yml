@@ -1,0 +1,74 @@
+version: "3.9"
+
+# ────────────────────────────────────────────────────────────────────────────
+# RAG-DocAnalysis – docker-compose
+#
+# Services
+# --------
+#  api   FastAPI REST server  → http://localhost:8000
+#        Interactive docs     → http://localhost:8000/docs
+#  ui    Gradio chat UI       → http://localhost:7860
+#
+# The app talks to your *host* Ollama instance via host.docker.internal.
+# Before starting, make sure Ollama is running locally and the required
+# models are pulled:
+#
+#     ollama pull gemma3:1b
+#     ollama pull nomic-embed-text:latest
+#
+# First-run workflow:
+#   1.  docker compose build
+#   2.  docker compose run --rm api python main.py ingest   # embed the docs
+#   3.  docker compose up
+# ────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── FastAPI server ──────────────────────────────────────────────────────
+  api:
+    build: .
+    command: uvicorn api.server:app --host 0.0.0.0 --port 8000 --log-level info
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/app/data/chroma
+      - ./docs:/app/docs:ro          # mount local docs as read-only
+      - eval_results:/app/data/eval_results
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      LLM_MODEL: gemma3:1b
+      EMBEDDING_MODEL: nomic-embed-text:latest
+      CHROMA_PERSIST_DIR: /app/data/chroma
+      DOCS_DIR: /app/docs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"     # Linux host networking
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  # ── Gradio UI ───────────────────────────────────────────────────────────
+  ui:
+    build: .
+    command: python ui/gradio_app.py
+    ports:
+      - "7860:7860"
+    environment:
+      API_BASE_URL: http://api:8000          # UI calls the API service
+      GRADIO_PORT: "7860"
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+    driver: local
+  eval_results:
+    driver: local

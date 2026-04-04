@@ -1,0 +1,104 @@
+INTRODUCTION TO ARTIFICIAL INTELLIGENCE: KEY CONCEPTS AND TERMINOLOGY
+======================================================================
+
+This glossary provides clear, accessible definitions of the most important
+terms in modern artificial intelligence and machine learning. It is intended
+for practitioners, students, and anyone looking to build a shared vocabulary
+around AI systems.
+
+──────────────────────────────────────────────────────────────────────────────
+
+LARGE LANGUAGE MODEL (LLM)
+   A Large Language Model is a type of deep neural network trained on massive
+   amounts of text data—often hundreds of billions of words sourced from books,
+   websites, academic papers, and code repositories. LLMs learn statistical
+   patterns in language, enabling them to generate coherent text, answer
+   questions, summarise documents, and perform many other language tasks.
+   Examples include GPT-4, Gemma, LLaMA, and Mistral.
+
+RETRIEVAL-AUGMENTED GENERATION (RAG)
+   Retrieval-Augmented Generation (RAG) is an AI architecture that combines
+   information retrieval with text generation. Instead of relying solely on
+   the knowledge baked into an LLM during training, a RAG system first
+   queries an external knowledge base (e.g., a vector database of company
+   documents) to retrieve relevant passages. Those passages are then inserted
+   into the model's prompt as context, allowing the model to produce grounded,
+   up-to-date answers. RAG reduces hallucinations and enables LLMs to answer
+   questions about private or recent data without expensive retraining.
+
+EMBEDDINGS
+   Embeddings are dense numerical vector representations of text (or other
+   data such as images and audio). A text embedding maps a word, sentence,
+   or document to a point in a high-dimensional space such that semantically
+   similar items are placed close together. For example, the sentences "How
+   do I reset my password?" and "I forgot my login credentials" would have
+   embedding vectors with a high cosine similarity. Embedding models—such as
+   OpenAI's text-embedding-ada or the open-source nomic-embed-text—are the
+   backbone of semantic search and RAG systems.
+
+VECTOR DATABASE
+   A vector database is a specialised data store optimised for storing and
+   querying embedding vectors. Unlike traditional relational databases that
+   search by exact keyword match, vector databases support approximate nearest
+   neighbour (ANN) search, allowing you to find documents that are semantically
+   similar to a query in milliseconds, even across millions of vectors.
+   Examples: Chroma, Pinecone, Weaviate, Milvus, Qdrant.
+
+FINE-TUNING
+   Fine-tuning is the process of adapting a pre-trained model to a specific task
+   or domain by continuing its training on a smaller, targeted dataset. Starting
+   from the general knowledge captured during pre-training, fine-tuning adjusts
+   the model's weights so it performs better on a narrow set of tasks—such as
+   medical question answering, legal document classification, or customer service
+   dialogue. Fine-tuning requires far less data and compute than training from
+   scratch.
+
+HALLUCINATION
+   In the context of AI language models, hallucination refers to the phenomenon
+   where a model generates text that is factually incorrect, fabricated, or not
+   supported by the available evidence. Hallucinations occur because LLMs are
+   trained to produce statistically plausible text rather than verified facts.
+   They can be subtle (slightly wrong dates or figures) or severe (entirely
+   fictional citations). Techniques such as Retrieval-Augmented Generation,
+   temperature reduction, and chain-of-thought prompting help mitigate
+   hallucination.
+
+TRANSFORMER ARCHITECTURE
+   The Transformer is the neural network architecture that underlies virtually
+   all modern LLMs. Introduced by Vaswani et al. in the 2017 paper "Attention
+   Is All You Need", it replaces recurrent processing with a self-attention
+   mechanism that weighs the relevance of every token in the input relative to
+   every other token. This allows massively parallel training and enables the
+   model to capture long-range dependencies in text. GPT, BERT, T5, and most
+   other foundation models are Transformer-based.
+
+TOKEN
+   A token is the basic unit of text that a language model processes. Depending
+   on the tokeniser, a token might correspond to a whole word, a sub-word, or
+   even a single character. For example, the word "unbelievable" might be split
+   into the tokens ["un", "believ", "able"]. Tokens are important because most
+   LLMs have a maximum context window measured in tokens (e.g., 4096, 32768),
+   and API pricing is typically based on the number of input and output tokens.
+
+PROMPT ENGINEERING
+   Prompt engineering is the practice of carefully designing the input text
+   (the "prompt") given to an LLM to elicit better, more accurate, or more
+   useful responses. Techniques include zero-shot prompting (asking the model
+   directly), few-shot prompting (providing examples), chain-of-thought
+   prompting (asking the model to reason step by step), and system prompts
+   (setting the model's persona or constraints). Effective prompts are specific,
+   give context, and set clear constraints on the format of the expected output.
+
+ZERO-SHOT AND FEW-SHOT LEARNING
+   Zero-shot learning means asking the model to perform a task it has never
+   seen during fine-tuning, relying entirely on its pre-trained knowledge.
+   Few-shot learning provides a small number of examples (shots) in the prompt
+   to guide the model's behaviour. Few-shot prompting can dramatically improve
+   task performance without any gradient updates to the model weights.
+
+TEMPERATURE
+   Temperature is a parameter that controls the randomness of a language model's
+   output. A temperature of 0 makes the model fully deterministic (always picks
+   the highest-probability token), while a higher temperature (e.g., 0.7–1.0)
+   introduces more variety and creativity. For factual Q&A, low temperatures
+   are preferred; for creative writing, higher temperatures are used.
